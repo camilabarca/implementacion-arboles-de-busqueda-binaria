@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <sys/time.h>
 
-#define n 20
+#define n 10
 #define pi 0.4
 #define pbe 0.4
 #define pbi 0.2
@@ -50,12 +50,18 @@ int find(int x, ABB **arbol){
 //0=insertar, 1 busq exitosa, 2 busq infructuosa
 
 int *secAleatoria(){
-    int *sec = malloc(sizeof(int)*n);
+    int *sec = malloc(sizeof(int)*(n-1));
     sec[0] = 0;
     int i = 1 ;
-    while (i < n){
-        int numero = rand() % 3;
-        sec[i] = numero;
+    while (i < n-1){
+        int numero = rand() % 100;
+        if (numero < 100*pi){
+            sec[i] = 0;
+        } else if (100*pi <= numero && numero < 100*(pi+pbe)){
+            sec[i] = 1;
+        } else {
+            sec[i] = 2;
+        }
         i++;
     }
     return sec;
@@ -64,50 +70,39 @@ int *secAleatoria(){
 
 int main(){
     int *s = secAleatoria();
-    for(int i = 0; i < n; i++){
-        //printf("%d", s[i]);
-    }
     ABB *tree = NULL;
     int nums[n];
-    //printf("%d", sizeof(nums)/sizeof(int));
-    int num = rand()%101;
-    while (find(num, &tree) == 1){
-        num = rand()%101;
-    }
+    int num = rand();
     insert(num, &tree);
     fprintf(stderr, "Se inserto %d\n", num);
-    nums[0] = num;
     int size_array = 1;
-    for (int j = 1; j< n;j++){
+    nums[0] = num;
+    int inserts = 1;
+    for (int j = 0; j< n-1;j++){
         if (s[j] == 0){
-            int num = rand()%101;
+            int num = rand();
             while (find(num, &tree) == 1){
-                num = rand()%101;
+                num = rand();
             }
             insert(num, &tree);
             fprintf(stderr, "Se inserto %d\n", num);
-            nums[j] = num;
+            nums[size_array] = num;
             size_array++;
         } else if (s[j] == 1){
-            int num = rand()%101;
-            while(find(num, &tree) == -1){
-                num = rand()%101;
-            }
-            //int num = nums[ind];
+            int ind = rand()%size_array;
+            int num = nums[ind];
+
             fprintf(stderr, "Se busco exitosamente %d y el resultado fue %d\n", num, find(num, &tree));
-            printf("%d\n", size_array);
-            //printf("%d\n", nums[ind]);
         } else {
-            int num = rand()%101;
+            int num = rand();
             while (find(num, &tree) == 1){
-                num = rand()%101;
+                num = rand();
             }
             find(num, &tree);
             fprintf(stderr, "Se buscon infructuasamente %d y el resultado fue %d\n", num, find(num, &tree));
         }
-        
-
     }
+
     //insert(1, &tree);
     //int x = find(1, &tree);
     //printf("%d", x);
