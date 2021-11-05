@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define n 10
+#define pi 0.4
+#define pbe 0.4
+#define pbi 0.2
+
 typedef struct avl{
     int root, fb;
     struct avl *der;
@@ -72,55 +77,53 @@ int getBalance(AVL *N)
     return height(N->izq) - height(N->der);
 }
 
-
-AVL* insert(AVL* node, int key){
+void insert(AVL **node, int key){
+    AVL *a = *node;
     /* 1.  Perform the normal BST insertion */
-    if (node == NULL)
-        return(newNode(key));
+    if (a == NULL){
+        a = newNode(key);
+        *node = a;
+    }
  
-    if (key < node->root)
-        node->izq  = insert(node->izq, key);
-    else if (key > node->root)
-        node->der = insert(node->der, key);
-    else // Equal keys are not allowed in BST
-        return node;
+    if (key < (*node)->root)
+        insert(&((*node)->izq), key);
+    else if (key > (*node)->root)
+        insert(&((*node)->der), key);
  
     /* 2. Update height of this ancestor node */
-    node->fb = 1 + max(height(node->izq),
-                           height(node->der));
+    (*node)->fb = 1 + max(height((*node)->izq),
+                           height((*node)->der));
  
     /* 3. Get the balance factor of this ancestor
           node to check whether this node became
           unbalanced */
-    int balance = getBalance(node);
+    int balance = getBalance(*node);
  
     // If this node becomes unbalanced, then
     // there are 4 cases
  
     // Left Left Case
-    if (balance > 1 && key < node->izq->root)
-        return rightRotate(node);
+    if (balance > 1 && key < (*node)->izq->root)
+        *node = rightRotate(*node);
  
     // Right Right Case
-    if (balance < -1 && key > node->der->root)
-        return leftRotate(node);
+    if (balance < -1 && key > (*node)->der->root)
+        *node = leftRotate(*node);
  
     // Left Right Case
-    if (balance > 1 && key > node->izq->root)
+    if (balance > 1 && key > (*node)->izq->root)
     {
-        node->izq =  leftRotate(node->izq);
-        return rightRotate(node);
+        (*node)->izq =  leftRotate((*node)->izq);
+        *node = rightRotate(*node);
     }
  
     // Right Left Case
-    if (balance < -1 && key < node->der->root)
+    if (balance < -1 && key < (*node)->der->root)
     {
-        node->der = rightRotate(node->der);
-        return leftRotate(node);
+        (*node)->der = rightRotate((*node)->der);
+        *node = leftRotate(*node);
     }
  
-    /* return the (unchanged) node pointer */
-    return node;
 }
 
 int find(int x, AVL *arbol){
@@ -133,6 +136,60 @@ int find(int x, AVL *arbol){
             find(x, arbol->der);
         } else{
             find(x, arbol->izq);
+        }
+    }
+}
+
+int *secAleatoria(){
+    int *sec = malloc(sizeof(int)*(n-1));
+    sec[0] = 0;
+    int i = 1 ;
+    while (i < n-1){
+        int numero = rand() % 100;
+        if (numero < 100*pi){
+            sec[i] = 0;
+        } else if (100*pi <= numero && numero < 100*(pi+pbe)){
+            sec[i] = 1;
+        } else {
+            sec[i] = 2;
+        }
+        i++;
+    }
+    return sec;
+
+}
+
+int main(){
+    int *s = secAleatoria();
+    AVL *tree = NULL;
+    int nums[n];
+    int num = rand();
+    insert(&tree, num);
+    fprintf(stderr, "Se inserto %d\n", num);
+    int size_array = 1;
+    nums[0] = num;
+    int inserts = 1;
+    for (int j = 0; j< n-1;j++){
+        if (s[j] == 0){
+            int num = rand();
+            while (find(num, tree) == 1){
+                num = rand();
+            }
+            insert(&tree, num);
+            fprintf(stderr, "Se inserto %d\n", num);
+            nums[size_array] = num;
+            size_array++;
+        } else if (s[j] == 1){
+            int ind = rand()%size_array;
+            int num = nums[ind];
+
+            fprintf(stderr, "Se busco exitosamente %d y el resultado fue %d\n", num, find(num, tree));
+        } else {
+            int num = rand();
+            while (find(num, tree) == 1){
+                num = rand();
+            }
+            fprintf(stderr, "Se busco infructuasamente %d y el resultado fue %d\n", num, find(num, tree));
         }
     }
 }

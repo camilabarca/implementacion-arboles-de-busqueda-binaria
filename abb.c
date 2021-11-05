@@ -98,8 +98,7 @@ int main(){
             while (find(num, &tree) == 1){
                 num = rand();
             }
-            find(num, &tree);
-            fprintf(stderr, "Se buscon infructuasamente %d y el resultado fue %d\n", num, find(num, &tree));
+            fprintf(stderr, "Se busco infructuasamente %d y el resultado fue %d\n", num, find(num, &tree));
         }
     }
 
