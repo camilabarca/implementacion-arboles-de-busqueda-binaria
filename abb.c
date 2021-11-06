@@ -116,12 +116,7 @@ int myRand(int arr[], int freq[], int size)
     return arr[indexc];
 }
 
-int main(){
-    //Secuencia aleatoria
-    int *s = secuenciaOper();
-    ABB *tree = NULL;
-    int nums[n];
-    int in_nums[1000000];
+void secAleatoria(int *s, ABB *tree, int *in_nums,int *nums){
     int num = random_number(1, 1000000);
     insert(num, &tree);
     fprintf(stderr, "Se inserto %d\n", num);
@@ -152,18 +147,15 @@ int main(){
             fprintf(stderr, "Se busco infructuasamente %d y el resultado fue %d\n", num, find(num, &tree));
         }
     }
+}
 
-    //Secuencia creciente
-    printf("\n");
-    ABB *treeCrec = NULL;
-    int numsCrec[n];
-    int in_numsCrec[1000000];
-    int numCrec = 0;
-    insert(numCrec, &treeCrec); //Inserto 0 de inicio
-    fprintf(stderr, "Se inserto %d\n", numCrec);
+void secCreciente(int *s, ABB *tree, int *in_nums,int *nums){
+    int num = 0;
+    insert(num, &treeCrec); //Inserto 0 de inicio
+    fprintf(stderr, "Se inserto %d\n", num);
     int m = 1;
-    numsCrec[0] = numCrec;
-    in_numsCrec[numCrec] = 1;
+    numsCrec[0] = num;
+    in_numsCrec[num] = 1;
     for (int j = 0; j< n-1;j++){
         if (s[j] == 0){
             int num = random_number(0, k*m);
@@ -190,7 +182,25 @@ int main(){
             fprintf(stderr, "Se busco infructuasamente %d y el resultado fue %d\n", num, find(num, &tree));
         }
     }
-    
+}
+
+int main(){
+    // Secuencia de operaciones
+    int *s = secuenciaOper();
+
+    //Secuencia aleatoria
+    ABB *tree = NULL;
+    int nums[n];
+    int in_nums[1000000];
+    secAleatoria(s,tree,in_nums,nums);
+
+    //Secuencia creciente
+    printf("\n");
+    // Podemos resetear las variables para no crearlas again iguales, no encontre una forma eficiente de hacerlo
+    ABB *treeCrec = NULL;
+    int numsCrec[n];
+    int in_numsCrec[1000000];
+    secCreciente(s,treeCrec,in_numsCrec,numsCrec);
 
     //Secuencia sesgada con p(x) = x
     printf("\n");
