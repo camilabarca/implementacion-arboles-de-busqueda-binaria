@@ -140,7 +140,7 @@ int find(int x, AVL *arbol){
     }
 }
 
-int *secAleatoria(){
+int *secuenciaOper(){
     int *sec = malloc(sizeof(int)*(n-1));
     sec[0] = 0;
     int i = 1 ;
@@ -156,11 +156,10 @@ int *secAleatoria(){
         i++;
     }
     return sec;
-
 }
 
 int main(){
-    int *s = secAleatoria();
+    int *s = secuenciaOper();
     AVL *tree = NULL;
     int nums[n];
     int num = rand();

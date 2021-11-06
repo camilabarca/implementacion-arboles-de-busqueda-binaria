@@ -33,13 +33,30 @@ int find(int x, BTree* arbol){
     }
 
     return find(x, arbol->subTree[i]);
-        
-
 }
 
 void insert(int x, BTree **b){
     BTree *a = *b;
-
+    if (a->leaf == 1 && a->n==0){
+        a->root[0] = x;
+        a->n++;
+    }
+    else if (a->n >= 1) {
+        int i = 0;
+        while (i < a->n && x > a->root[i]){ //Busco posicion correcta de x
+            i++;
+        }
+        if (a->n < a->B){ //Tengo espacio libres
+            for (int j = a->n; j > i; j--){ // Muevo todos los elementos despues de i a la derecha
+                a->root[j] = a->root[j-1];
+            }
+            a->root[i] = x;
+            a->n++;
+        } 
+        else { //No me quedan espacios libres
+            
+        }
+    }
 }
 
 int main(){
