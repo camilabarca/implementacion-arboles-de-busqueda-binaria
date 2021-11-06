@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <time.h>
 
-#define n 100
+#define n 10
 #define pi 0.4
 #define pbe 0.4
 #define pbi 0.2
@@ -50,10 +50,9 @@ int find(int x, ABB **arbol){
 
 //0=insertar, 1 busq exitosa, 2 busq infructuosa
 
-int *secAleatoria(){
+int *secuenciaOper(){
     int *sec = malloc(sizeof(int)*(n-1));
-    sec[0] = 0;
-    int i = 1 ;
+    int i = 0;
     while (i < n-1){
         int numero = rand() % 100;
         if (numero < 100*pi){
@@ -86,9 +85,40 @@ int random_number(int min_num, int max_num)
         return result;
     }
 
+//encontrar techo de r en arr
+int findCeil(int arr[], int r, int l, int h)
+{
+    int mid;
+    while (l < h)
+    {
+         mid = l + ((h - l) >> 1);  // Same as mid = (l+h)/2
+        (r > arr[mid]) ? (l = mid + 1) : (h = mid);
+    }
+    return (arr[l] >= r) ? l : -1;
+}
+
+// The main function that returns a random number from arr[] according to
+// distribution array defined by freq[]. n is size of arrays.
+int myRand(int arr[], int freq[], int size)
+{
+    // Create and fill prefix array
+    int prefix[size], i;
+    prefix[0] = freq[0];
+    for (i = 1; i < size; i++)
+        prefix[i] = prefix[i - 1] + freq[i];
+ 
+    // prefix[n-1] is sum of all frequencies. Generate a random number
+    // with value from 1 to this sum
+    int r = (rand() % prefix[size - 1]) + 1;
+ 
+    // Find index of ceiling of r in prefix array
+    int indexc = findCeil(prefix, r, 0, size - 1);
+    return arr[indexc];
+}
+
 int main(){
     //Secuencia aleatoria
-    int *s = secAleatoria();
+    int *s = secuenciaOper();
     ABB *tree = NULL;
     int nums[n];
     int in_nums[1000000];
@@ -125,7 +155,6 @@ int main(){
 
     //Secuencia creciente
     printf("\n");
-    printf("Se inicia secuencia creciente.");
     ABB *treeCrec = NULL;
     int numsCrec[n];
     int in_numsCrec[1000000];
@@ -161,5 +190,47 @@ int main(){
             fprintf(stderr, "Se busco infructuasamente %d y el resultado fue %d\n", num, find(num, &tree));
         }
     }
+    
+
+    //Secuencia sesgada con p(x) = x
+    printf("\n");
+    ABB *treeSesg = NULL;
+    int numsSesg[n];
+    int px[n];
+    int in_numsSesg[1000];
+    /*int numSesg = random_number(1, 1000000);
+    insert(numSesg, &treeSesg);
+    fprintf(stderr, "Se inserto %d\n", numSesg);
+    int size_arraySesg = 1;
+    numsSesg[0] = numSesg;
+    px[0] = numSesg;
+    in_numsSesg[numSesg-1] = 1;
+    for (int j = 0; j< n-1;j++){
+        if (s[j] == 0){
+            int num = random_number(1, 1000000);
+            while (in_numsSesg[num-1] == 1){
+                num = random_number(1, 1000000);
+            }
+            insert(num, &treeSesg);
+            fprintf(stderr, "Se inserto %d\n", num);
+            numsSesg[size_arraySesg] = num;
+            px[size_arraySesg] = num;
+            in_numsSesg[num-1] = 1;
+            size_arraySesg++;
+        } else if (s[j] == 1){
+            int num = myRand(numsSesg, px, size_arraySesg);
+            fprintf(stderr, "Se busco exitosamente %d y el resultado fue %d\n", num, find(num, &treeSesg));
+
+        } else {
+            int num = random_number(1, 1000000);
+            while (in_numsSesg[num] == 1){
+                num = random_number(1, 1000000);
+            }
+            fprintf(stderr, "Se busco infructuasamente %d y el resultado fue %d\n", num, find(num, &treeSesg));
+        }
+
+    }*/
+
+
     return 1;
 }
