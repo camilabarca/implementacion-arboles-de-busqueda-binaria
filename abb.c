@@ -4,12 +4,12 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <time.h>
+#include <math.h>
 
 #define n 10
 #define pi 0.4
 #define pbe 0.4
 #define pbi 0.2
-#define k 0.5
 
 typedef struct abb{
     int root;
@@ -51,6 +51,7 @@ int find(int x, ABB **arbol){
 //0=insertar, 1 busq exitosa, 2 busq infructuosa
 
 int *secuenciaOper(){
+    srand(time(NULL));
     int *sec = malloc(sizeof(int)*(n-1));
     int i = 0;
     while (i < n-1){
@@ -99,14 +100,7 @@ int findCeil(int arr[], int r, int l, int h)
 
 // The main function that returns a random number from arr[] according to
 // distribution array defined by freq[]. n is size of arrays.
-int myRand(int arr[], int freq[], int size)
-{
-    // Create and fill prefix array
-    int prefix[size], i;
-    prefix[0] = freq[0];
-    for (i = 1; i < size; i++)
-        prefix[i] = prefix[i - 1] + freq[i];
- 
+int myRand(int arr[], int freq[], int size, int prefix[]){
     // prefix[n-1] is sum of all frequencies. Generate a random number
     // with value from 1 to this sum
     int r = (rand() % prefix[size - 1]) + 1;
@@ -116,7 +110,9 @@ int myRand(int arr[], int freq[], int size)
     return arr[indexc];
 }
 
-void secAleatoria(int *s, ABB *tree, int *in_nums,int *nums){
+void secAleatoria(int *s, ABB *tree){
+    int nums[n] = {0};
+    int in_nums[1000000] = {0};
     int num = random_number(1, 1000000);
     insert(num, &tree);
     fprintf(stderr, "Se inserto %d\n", num);
@@ -149,13 +145,15 @@ void secAleatoria(int *s, ABB *tree, int *in_nums,int *nums){
     }
 }
 
-void secCreciente(int *s, ABB *tree, int *in_nums,int *nums){
+void secCreciente(int *s, ABB *tree, float k){
+    int nums[n] = {0};
+    int in_nums[1000000] = {0};
     int num = 0;
-    insert(num, &treeCrec); //Inserto 0 de inicio
+    insert(num, &tree); //Inserto 0 de inicio
     fprintf(stderr, "Se inserto %d\n", num);
     int m = 1;
-    numsCrec[0] = num;
-    in_numsCrec[num] = 1;
+    nums[0] = num;
+    in_nums[num] = 1;
     for (int j = 0; j< n-1;j++){
         if (s[j] == 0){
             int num = random_number(0, k*m);
@@ -175,72 +173,102 @@ void secCreciente(int *s, ABB *tree, int *in_nums,int *nums){
 
             fprintf(stderr, "Se busco exitosamente %d y el resultado fue %d\n", num, find(num, &tree));
         } else {
-            int num = random_number(1, 1000000);
+            int num = random_number(0, 1000000);
             while (in_nums[num] == 1){
-                num = random_number(1, 1000000);
+                num = random_number(0, 1000000);
             }
             fprintf(stderr, "Se busco infructuasamente %d y el resultado fue %d\n", num, find(num, &tree));
         }
     }
 }
 
-int main(){
-    // Secuencia de operaciones
-    int *s = secuenciaOper();
-
-    //Secuencia aleatoria
-    ABB *tree = NULL;
-    int nums[n];
-    int in_nums[1000000];
-    secAleatoria(s,tree,in_nums,nums);
-
-    //Secuencia creciente
-    printf("\n");
-    // Podemos resetear las variables para no crearlas again iguales, no encontre una forma eficiente de hacerlo
-    ABB *treeCrec = NULL;
-    int numsCrec[n];
-    int in_numsCrec[1000000];
-    secCreciente(s,treeCrec,in_numsCrec,numsCrec);
-
-    //Secuencia sesgada con p(x) = x
-    printf("\n");
-    ABB *treeSesg = NULL;
-    int numsSesg[n];
-    int px[n];
-    int in_numsSesg[1000];
-    /*int numSesg = random_number(1, 1000000);
-    insert(numSesg, &treeSesg);
-    fprintf(stderr, "Se inserto %d\n", numSesg);
-    int size_arraySesg = 1;
-    numsSesg[0] = numSesg;
-    px[0] = numSesg;
-    in_numsSesg[numSesg-1] = 1;
+void secSesgada(int *s, ABB *tree, int px){
+    int nums[n] = {0};
+    int in_nums[1000000] = {0};
+    int peso[n];
+    int prefix[n];
+    int num = random_number(1, 1000000);
+    insert(num, &tree);
+    fprintf(stderr, "Se inserto %d\n", num);
+    int size_array = 1;
+    nums[0] = num;
+    if (px == 0){
+        peso[0] = num;
+    } else if (px == 1){
+        peso[0] = (int) sqrt((double)num);
+    } else {
+        peso[0] = (int) log((double)num);
+    }
+    prefix[0] = peso[0];
+    in_nums[num-1] = 1;
     for (int j = 0; j< n-1;j++){
         if (s[j] == 0){
             int num = random_number(1, 1000000);
-            while (in_numsSesg[num-1] == 1){
+            while (in_nums[num-1] == 1){
                 num = random_number(1, 1000000);
             }
-            insert(num, &treeSesg);
+            insert(num, &tree);
             fprintf(stderr, "Se inserto %d\n", num);
-            numsSesg[size_arraySesg] = num;
-            px[size_arraySesg] = num;
-            in_numsSesg[num-1] = 1;
-            size_arraySesg++;
+            nums[size_array] = num;
+            if (px == 0){
+                peso[size_array] = num;
+            } else if (px == 1){
+                peso[0] =  (int) sqrt((double)num);
+            } else {
+                peso[0] = (int) log((double)num);
+            }
+            prefix[size_array] = prefix[size_array-1] + peso[size_array];
+            in_nums[num-1] = 1;
+            size_array++;
         } else if (s[j] == 1){
-            int num = myRand(numsSesg, px, size_arraySesg);
-            fprintf(stderr, "Se busco exitosamente %d y el resultado fue %d\n", num, find(num, &treeSesg));
+            int num = myRand(nums, peso, size_array, prefix);
 
+            fprintf(stderr, "Se busco exitosamente %d y el resultado fue %d\n", num, find(num, &tree));
         } else {
             int num = random_number(1, 1000000);
-            while (in_numsSesg[num] == 1){
+            while (in_nums[num-1] == 1){
                 num = random_number(1, 1000000);
             }
-            fprintf(stderr, "Se busco infructuasamente %d y el resultado fue %d\n", num, find(num, &treeSesg));
+            fprintf(stderr, "Se busco infructuasamente %d y el resultado fue %d\n", num, find(num, &tree));
         }
+    }
 
-    }*/
+}
 
+
+
+int main(){
+    // Secuencia de operaciones
+    int *s = secuenciaOper();
+    ABB *tree = NULL;
+
+    //Secuencia aleatoria
+    secAleatoria(s,tree);
+    tree = NULL;
+   
+    //Secuencia creciente
+    printf("\n");
+    secCreciente(s,tree, 0.1);
+    tree = NULL;
+
+    printf("\n");
+    secCreciente(s,tree, 0.5);
+    tree = NULL;
+
+    //Secuencia sesgada con p(x) = x
+    printf("\n");
+    secSesgada(s,tree, 0);
+    tree = NULL;
+
+    //Secuencia sesgada con p(x) = sqrt(x)
+    printf("\n");
+    secSesgada(s,tree, 1);
+    tree = NULL;
+
+    //Secuencia sesgada con p(x) = ln(x)
+    printf("\n");
+    secSesgada(s,tree, 2);
+    tree = NULL;
 
     return 1;
 }
