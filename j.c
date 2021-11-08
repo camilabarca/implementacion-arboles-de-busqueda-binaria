@@ -79,7 +79,7 @@ void splitChild(int i, BTree *y, BTree **x, int k){ //[2,3,5,6] insertando el 4
 
     // Copio ultimos B/2 elem
     //inserto un 1
-    y->n = z->n;
+    y->n = z->n; // == 2
     
     if(k < y->keys[(z->n)]){ //inclusive si inserto un 4 o algo menor, copio los ultimos 2
         //copio los ultimos 2 elem
@@ -377,9 +377,9 @@ int main(){
     insert(2, &a);
     insert(5, &a);
     insert(6, &a);
-    insert(1, &a);
+    //insert(1, &a);
     //insert(8, &a);
-    //insert(4, &a);
+    insert(4, &a);
     traverse(a->root);
     return 1;
 }
