@@ -42,106 +42,42 @@ BTree* createTree(int B, int l){
 }
 
 
-void traverse(BTree *a)
-{
-    // There are n keys and n+1 children, traverse through n keys
-    // and first n children
-    int i;
-    for (i = 0; i < a->n; i++)
-    {
-        // If this is not leaf, then before printing key[i],
-        // traverse the subtree rooted with child C[i].
-        if (a->leaf == 0)
-            traverse(a->C[i]);
-        printf(" ");
-        printf("%d", a->keys[i]);
-    }
-    printf("\n");
- 
-    // Print the subtree rooted with last child
-    if (a->leaf == 0)
-        traverse(a->C[i]);
-}
-
-//FUNCIONA SOLO PARA ARBOLES B, CON B PAR
-void splitChild(int i, BTree *y, BTree **x, int k){ //[2,3,5,6] insertando el 4
-
-    // x->C[0] = [2,3,5,6] -> deberia apuntar solo a 1 y 2
-
+void splitChild(int i, BTree *y, BTree **x){
 
     // Creo nuevo nodo
-    BTree *z = createTree(y->B, y->leaf); // tendrá los ultimos dos, ie [5, 6]
-    //z->n = (((*x)->B + 1) / 2) - 1; // si b= 4, este corcho retorna 1, pq 5/2 es 2.
-    z->n = (((*x)->B) / 2) ; // retorna 2
-
+    BTree *z = createTree(y->B, y->leaf);  
+    z->n = (((*x)->B + 1) / 2) - 1;
+ 
     // Copio ultimos B/2 elem
-    //inserto un 1
-    y->n = z->n;
-    
-    if(k < y->keys[(z->n)]){ //inclusive si inserto un 4 o algo menor, copio los ultimos 2
-        //copio los ultimos 2 elem
-        for (int j = 0; j < z->n; j++){ //copio desde 0 a 1. --> 2 a 3 
-            z->keys[j] = y->keys[j+(z->n)]; // z->keys = [ 5, 6, , ]
-            printf("%d", j);
-            printf("%d", y->keys[j+(z->n)]);
-        }
-        // inserto el k en el a, ie, en y 
-        int pos= y->n;
-        while (pos >= 0 && y->keys[pos] > k)
-            {
-                y->keys[pos+1] = y->keys[pos];   // insterto 1 en a ----> a = [ ,2 ,3 , ]  -> i = -1
-                pos--;
-            }
-        y->keys[pos+1] = k;
-    }
-    //inserto un 7
-    else{ // si inserto un 7 o algo mayor al y->keys[1], 5 pasa a ser mi mitad
-        for (int j = 0; j < (z->n)-1 ; j++) // 
-            z->keys[j] = y->keys[j+(z->n)+1]; // me salto el que sera mi mitad
-        int pos= (z->n-1);
-        while (pos >= 0 && y->keys[pos] > k)
-            {
-                z->keys[pos+1] = z->keys[pos];   // insterto 1 en a ----> a = [ ,2 ,3 , ]  -> i = -1
-                pos--;
-            }
-        z->keys[pos+1] = k;
-    }
-
-    // si no es hoja copio tambien los arboles hijos
+    for (int j = 0; j < (((*x)->B + 1) / 2) - 1; j++)
+        z->keys[j] = y->keys[j+(((*x)->B + 1) / 2)];
+ 
+    // si no es hoja copio tambien los hijos
     if (y->leaf == 0)
     {
         for (int j = 0; j < (((*x)->B + 1) / 2); j++)
             z->C[j] = y->C[j+(((*x)->B + 1) / 2)];
     }
  
-    // Reduce the number of keys in y 
-     // ahora en y (alias a), quedan solo la primera mitad de los elementos, ya que z tiene la segunda mitad
+    // Reduce the number of keys in y
+    y->n = (((*x)->B + 1) / 2)- 1;
  
-    // Since this node is going to have a new child,
+    // Since this node is going to have a new child,  
     // create space of new child
-    //NO SE PA QUE FUNCIONA ESTOO, debe ser pa cuando rompo un nodo de mas arriba por consecuencia de un insert
-    for (int j = (*x)->n; j >= i+1; j--) // j= 0, j >= 1 ; j--
+    for (int j = (*x)->n; j >= i+1; j--)
         (*x)->C[j+1] = (*x)->C[j];
  
     // Link the new child to this node
-    (*x)->C[i+1] = z; // S[C] -> [ apunta a a->keys, apunta a z ], ie ->[5, 6,  ,  ]
+    (*x)->C[i+1] = z;
  
     // A key of y will move to this node. Find the location of
     // new key and move all greater keys one space ahead
-    for (int j = (*x)->n-1; j >= i; j--) // j = -1, j>= 0 ; j--
+    for (int j = (*x)->n-1; j >= i; j--)
         (*x)->keys[j+1] = (*x)->keys[j];
  
     // Copy the middle key of y to this node
-    int pos_med = z->n; // 2
-    if(y->keys[pos_med -1] < k < y->keys[pos_med]){
-        (*x)->keys[i] = k;  //copio en S->keys[0] = 4
-    }
-    else{
-        if(k < y->keys[pos_med]){
-            pos_med--;
-        }
-        (*x)->keys[i] = y->keys[pos_med]; // copia en S->keys[0] = 3, ie, a->keys[1]
-    }
+    (*x)->keys[i] = y->keys[(((*x)->B + 1) / 2)-1];
+ 
     // Increment count of keys in this node
     (*x)->n = (*x)->n + 1;
 }
@@ -213,7 +149,7 @@ void insertNonFull(int k, BTree **b)
 {
     BTree *a = *b;
     // Initialize index as index of rightmost element
-    int i = a->n-1; // si funciona pq es n!!! [2 3 5 6] n= 2 -> i = 1 
+    int i = a->n-1;
  
     // If this is a leaf node
     if (a->leaf == 1)
@@ -223,19 +159,18 @@ void insertNonFull(int k, BTree **b)
         // b) Moves all greater keys to one place ahead
         while (i >= 0 && a->keys[i] > k)
         {
-            a->keys[i+1] = a->keys[i];   // insterto 1 en a ----> a = [ ,2 ,3 , ]  -> i = -1
+            a->keys[i+1] = a->keys[i];
             i--;
         }
  
         // Insert the new key at found location
-        a->keys[i+1] = k;  // a = [1, 2, 3, 6]
-        a->n = a->n+1;   // a->n = 3 
+        a->keys[i+1] = k;
+        a->n = a->n+1;
         *b = a;
     }
     else // If this node is not leaf
     {
         // Find the child which is going to have the new key
-        //inicialmente i = b-1
         while (i >= 0 && a->keys[i] > k)
             i--;
  
@@ -274,16 +209,13 @@ void insert(int k, BTreeRoot **tree)
     else // Arbol no vacio
     {
         // Raiz llena
-        if (a->root->n == a->B)  //  [ 2 3 5 6] inserto el 1
-        // queremos q sea :      [3]
-        //                 [1 2]     [5 6]
+        if (a->root->n == a->B)
         {
             // Allocate memory for new root
-            // arbol de capacidad B. 0: no es hoja. 1: es hoja
-            BTree *s = createTree(a->B, 0); 
+            BTree *s = createTree(a->B, 0);
 
+ 
             // Make old root as child of new root
-            // C es un puntero a todos los arboles hijos.
             s->C[0] = a->root;
  
             
@@ -305,6 +237,34 @@ void insert(int k, BTreeRoot **tree)
     }
 }
 
+void traverse(BTree *a)
+{
+
+    for (int i = 0; i< a->n; i++){
+        printf("%d", a->keys[i]);
+        
+    }
+  
+
+    
+    // There are n keys and n+1 children, traverse through n keys
+    // and first n children
+    /*int i;
+    for (i = 0; i < a->n; i++)
+    {
+        // If this is not leaf, then before printing key[i],
+        // traverse the subtree rooted with child C[i].
+        if (a->leaf == 0)
+            traverse(a->C[i]);
+        printf(" ");
+        printf("%d", a->keys[i]);
+    }
+    printf("\n");*/
+ 
+    // Print the subtree rooted with last child
+    /*if (a->leaf == 0)
+        traverse(a->C[i]);*/
+}
 
 int main(){
     BTreeRoot *a = (BTreeRoot*) malloc(sizeof(BTreeRoot*));
@@ -319,6 +279,6 @@ int main(){
     insert(7, &a);
     insert(8, &a);
     traverse(a->root);
+    traverse(a->root->C[1]);
     return 1;
 }
-
