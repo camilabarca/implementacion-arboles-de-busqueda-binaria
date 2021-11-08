@@ -17,7 +17,7 @@ typedef struct avl{
     struct avl *izq;
 } AVL;
 
-
+//Altura arbol N
 int height(AVL *N)
 {
     if (N == NULL)
@@ -25,11 +25,20 @@ int height(AVL *N)
     return N->fb;
 }
  
-// A utility function to get maximum of two integers
+//Máximo entre a y b
 int max(int a, int b)
 {
     return (a > b)? a : b;
 }
+
+//diferencia entre alturas de arbol izq y der
+int getBalance(AVL *N)
+{
+    if (N == NULL)
+        return 0;
+    return height(N->izq) - height(N->der);
+}
+
 
 AVL* newNode(int key){
     AVL* node = (AVL*)
@@ -40,6 +49,7 @@ AVL* newNode(int key){
     node->fb = 1;  // new node is initially added at leaf
     return(node);
 }
+
 
 AVL *rightRotate(AVL *y)
 {
@@ -75,12 +85,7 @@ AVL *leftRotate(AVL *x)
     return y;
 }
 
-int getBalance(AVL *N)
-{
-    if (N == NULL)
-        return 0;
-    return height(N->izq) - height(N->der);
-}
+
 
 void insert(int key, AVL **node){
     AVL *a = *node;
