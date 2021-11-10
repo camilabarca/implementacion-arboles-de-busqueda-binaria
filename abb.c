@@ -178,7 +178,7 @@ void correrSecuencia(int *op, int *sec, ABB *tree){
             //fprintf(stderr,"%f\n",(float) start_t);
             //fprintf(stderr,"%f\n",(float) end_t);
             float total_t = ((float)(end_t - start_t)) / CLOCKS_PER_SEC;
-            t[i] += total_t/tamPaq; // Tiempo promedio de las 1000 operaciones
+            t[i] = t[i] + total_t/tamPaq; // Tiempo promedio de las 1000 operaciones
             start_t = end_t; // Anoto como tiempo inicial el actual
             fprintf(stderr,"Tiempo de paquete %d es: %f\n", (i+1),t[i]);
             i ++;
@@ -186,6 +186,7 @@ void correrSecuencia(int *op, int *sec, ABB *tree){
     }
 }
 
+/*
 void secAleatoria(int *s, ABB *tree, float *t){
     int nums[n] = {0};
     int in_nums[1000000] = {0};
@@ -235,6 +236,7 @@ void secAleatoria(int *s, ABB *tree, float *t){
         }
     }
 }
+*/
 
 void secCreciente(int *s, ABB *tree, float k){
     int nums[n] = {0};
@@ -341,19 +343,18 @@ int main(){
         t[j] = 0;
     }
     int *secAl;
-    for (int j = 0; j < n/tamPaq ; j++){  
-        printf("%d\n",t[j]);
-    }
     //float t[tamPaq] = {0}; //1000 tiempos, calculados cada 1000 operaciones, total de 10^6 operaciones
     for (int i = 0; i < nSec; i++){
         secAl = generarSecAleatoria(s);
         correrSecuencia(s,secAl,tree); // Calculo tiempos de la secuencia i
-        fprintf(stderr, "Se termino la secuencia %d!\n",i);
+        fprintf(stderr, "Se termino la secuencia %d!\n",i+1);
         tree = NULL;
     }
     for (int j = 0; j < n/tamPaq ; j++){  
-        printf("%d\n",t[j]);
+        printf("%f\n",t[j]);
         t[j] = t[j]/nSec; // Divido por totales de secuencias
+        printf("%f\n",t[j]);
+        printf("\n");
     }
     //*/
    
