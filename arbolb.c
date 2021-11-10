@@ -53,7 +53,7 @@ void separate(int x, BTree **b){
     }
     int pos_mediana = (a->B)/2; //+ 1 - 1
     BTree* h1 = createTree(a->B);
-    BTree* h2 =createTree(a->B);
+    BTree* h2 = createTree(a->B);
     for (int i = 0; i < pos_mediana; i++){
         h1 -> root[i] = arr[i];
     }
@@ -61,11 +61,6 @@ void separate(int x, BTree **b){
         h2 -> root[i] = arr[i];
     }
     separate(arr[pos_mediana], &((*b)->father));
-
-
-
-
-
 }
 
 

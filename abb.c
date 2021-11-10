@@ -6,10 +6,10 @@
 #include <time.h>
 #include <math.h>
 
-#define n 10
-#define pi 0.4
-#define pbe 0.4
-#define pbi 0.2
+#define n 1000000 //10^6
+#define pi 0.5
+#define pbe 1/3
+#define pbi 1/6
 
 typedef struct abb{
     int root;
@@ -110,37 +110,50 @@ int myRand(int arr[], int freq[], int size, int prefix[]){
     return arr[indexc];
 }
 
-void secAleatoria(int *s, ABB *tree){
+void secAleatoria(int *s, ABB *tree, double *t){
     int nums[n] = {0};
     int in_nums[1000000] = {0};
     int num = random_number(1, 1000000);
+    // Medicion de tiempo
+    int i = 0; // Recorre los indices de t
+    clock_t start_t, end_t, total_t;
+    start_t = clock(); // Tiempo inicial, arrancar el reloj
     insert(num, &tree);
-    fprintf(stderr, "Se inserto %d\n", num);
+    //fprintf(stderr, "Se inserto %d\n", num);
     int size_array = 1;
     nums[0] = num;
     in_nums[num-1] = 1;
+
     for (int j = 0; j< n-1;j++){
-        if (s[j] == 0){
+        if (s[j] == 0){ // Inserción
             int num = random_number(1, 1000000);
             while (in_nums[num-1] == 1){
                 num = random_number(1, 1000000);
             }
             insert(num, &tree);
-            fprintf(stderr, "Se inserto %d\n", num);
+            //fprintf(stderr, "Se inserto %d\n", num);
             nums[size_array] = num;
             in_nums[num-1] = 1;
             size_array++;
-        } else if (s[j] == 1){
+        } else if (s[j] == 1){ // Busqueda exitosa
             int ind = rand()%size_array;
             int num = nums[ind];
 
-            fprintf(stderr, "Se busco exitosamente %d y el resultado fue %d\n", num, find(num, &tree));
-        } else {
+            //fprintf(stderr, "Se busco exitosamente %d y el resultado fue %d\n", num, find(num, &tree));
+        } else { // Busqueda infructuosa
             int num = random_number(1, 1000000);
             while (in_nums[num-1] == 1){
                 num = random_number(1, 1000000);
             }
-            fprintf(stderr, "Se busco infructuasamente %d y el resultado fue %d\n", num, find(num, &tree));
+            //fprintf(stderr, "Se busco infructuasamente %d y el resultado fue %d\n", num, find(num, &tree));
+        }
+        if ((j+2)%1000 == 0){ //Pasaron 1000 operaciones y debo registrar tiempos
+            end_t = clock(); // Tiempo actual
+            total_t = (double)(end_t - start_t) / CLOCKS_PER_SEC;
+            t[i] += total_t/1000; // Tiempo promedio de las 1000 operaciones
+            start_t = end_t; // Anoto como tiempo inicial el actual
+            i ++;
+            printf("Han pasado %d operaciones", 1000*(i+1));
         }
     }
 }
@@ -232,7 +245,6 @@ void secSesgada(int *s, ABB *tree, int px){
             fprintf(stderr, "Se busco infructuasamente %d y el resultado fue %d\n", num, find(num, &tree));
         }
     }
-
 }
 
 
@@ -243,9 +255,18 @@ int main(){
     ABB *tree = NULL;
 
     //Secuencia aleatoria
-    secAleatoria(s,tree);
-    tree = NULL;
+    double t[1000] = {0}; //1000 tiempos, calculados cada 1000 operaciones, total de 10^6 operaciones
+    for (int i = 0; i < 100; i++){
+        secAleatoria(s,tree,t); // Calculo 1000 tiempos de la secuencia i
+        printf("Se termino la secuencia %d!",i);
+        tree = NULL;
+    }
+    for (int j = 0; j < 1000 ; j++){  
+        t[j] = t[j]/100; // Divido por totales de secuencias
+        printf("%d",t[j]);
+    }
    
+    /*
     //Secuencia creciente
     printf("\n");
     secCreciente(s,tree, 0.1);
@@ -269,6 +290,7 @@ int main(){
     printf("\n");
     secSesgada(s,tree, 2);
     tree = NULL;
+    */
 
     return 1;
 }
